@@ -1,0 +1,29 @@
+# Déposer dump.sql + filestore/ dans INPUT_DIR, puis démarrer cette stack.
+services:
+  migrator:
+    build:
+      context: ./odoo-migration-gui
+    image: odoo-migration-once:local
+    entrypoint: ["python3", "/app/oneshot.py"]
+    restart: "no"
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      ODOO_MIGRATION_HOME: ${ODOO_MIGRATION_HOME:-/opt/odoo-migration-once}
+      HOME: ${ODOO_MIGRATION_HOME:-/opt/odoo-migration-once}/.home
+      TARGET_VERSION: ${TARGET_VERSION:-20}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: ${INPUT_DIR:-/opt/odoo-migration-input}
+        target: /input
+        read_only: true
+        bind:
+          create_host_path: false
+      # Ce chemin doit être identique sur l'hôte et dans le conteneur.
+      - ${ODOO_MIGRATION_HOME:-/opt/odoo-migration-once}:${ODOO_MIGRATION_HOME:-/opt/odoo-migration-once}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+    security_opt:
+      - no-new-privileges:true

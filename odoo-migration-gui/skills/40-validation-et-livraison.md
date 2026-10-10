@@ -1,0 +1,5 @@
+# Validation et livraison
+Source : https://oca.github.io/OpenUpgrade/050_after_migration.html (consultée le 2026-10-10). OpenUpgrade conserve volontairement certaines anciennes tables et colonnes, notamment openupgrade_legacy_. Ne pas les purger automatiquement : elles peuvent servir aux paliers suivants ou au diagnostic. « Modules natifs uniquement » ne signifie pas supprimer toutes les traces historiques du schéma.
+Les contrôles indépendants de l'IA portent sur la restauration, SHA-256, version réelle, état des modules, compteurs, totaux comptables, pièces jointes, réseau et ressources Docker de test. Ils ne peuvent être désactivés par une décision du modèle.
+Un écart de compteurs peut être légitime, mais sans preuve et test adaptés il reste bloquant. Ne pas corriger les données pour faire artificiellement correspondre les compteurs.
+La livraison est une sauvegarde Odoo SQL + filestore de la version cible validée. Le moteur teste une restauration finale avant l'export. Il ne remplace pas la production, ne bascule pas Traefik et ne réactive pas les intégrations externes. Aucun succès partiel ne doit être présenté comme une migration complète.

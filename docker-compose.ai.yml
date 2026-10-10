@@ -1,0 +1,52 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    # Aucun port publié : accessible seulement par les services de cette stack.
+  model-init:
+    image: ollama/ollama:latest
+    restart: "no"
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      AI_MODEL: ${AI_MODEL:-qwen3:8b}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - 'n=0; until ollama list >/dev/null 2>&1; do n=$$((n+1)); [ "$$n" -lt 60 ] || exit 1; sleep 2; done; exec ollama pull "$$AI_MODEL"'
+  agent:
+    build:
+      context: ./odoo-migration-gui
+    image: odoo-ai-migration:local
+    stop_grace_period: 2m
+    entrypoint: ["python3", "/app/ai_agent.py"]
+    restart: "no"
+    depends_on:
+      model-init:
+        condition: service_completed_successfully
+    environment:
+      SOURCE_CONTAINER: ${SOURCE_CONTAINER:?Indiquer le conteneur Odoo source}
+      SOURCE_DB_CONTAINER: ${SOURCE_DB_CONTAINER:-}
+      SOURCE_DATABASE: ${SOURCE_DATABASE:-}
+      TARGET_VERSION: ${TARGET_VERSION:-latest}
+      AI_MODEL: ${AI_MODEL:-qwen3:8b}
+      OLLAMA_URL: http://ollama:11434
+      AI_MAX_ACTIONS: ${AI_MAX_ACTIONS:-16}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-900}
+      SKILLS_DIR: /app/skills
+      ODOO_MIGRATION_HOME: ${ODOO_MIGRATION_HOME:-/opt/odoo-ai-migration}
+      HOME: ${ODOO_MIGRATION_HOME:-/opt/odoo-ai-migration}/.home
+      DOCKER_HOST: unix:///var/run/docker.sock
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${ODOO_MIGRATION_HOME:-/opt/odoo-ai-migration}:${ODOO_MIGRATION_HOME:-/opt/odoo-ai-migration}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  ollama-models:

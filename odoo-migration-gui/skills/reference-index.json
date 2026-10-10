@@ -1,0 +1,13 @@
+{
+  "references": [
+    {
+      "path": "references/txampa-odoo-integration/SKILL.md",
+      "source": "https://github.com/txampa/claude-skill-odoo-integration",
+      "commit": "9c1def4043bd1ede1bea94fc1a54a72138e68920",
+      "sha256": "cf63ba033664f4f6a0f542fc5d91d8e3088611e7673a5e481111681fb57e5535",
+      "license": "MIT",
+      "license_file": "references/txampa-odoo-integration/LICENSE.txt",
+      "declared_versions": "Odoo 8–17"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+work/
+__pycache__/
+*.pyc
+*.log
+.env
+test_*.py

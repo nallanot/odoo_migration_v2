@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.migration.example
+work/
+input/
+output/
+*.log
